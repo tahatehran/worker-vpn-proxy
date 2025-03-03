@@ -14,7 +14,10 @@ export default {
       if (request.method !== 'GET') {
         return new Response('Method Not Allowed', { status: 405 });
       }
-  
+     const authHeader = request.headers.get('Authorization');
+      if (!authHeader || authHeader !== `Bearer ${API_TOKEN}`) {
+        return new Response('Unauthorized', { status: 401 });
+      }
       try {
         // دریافت داده از Supabase
         const response = await fetch(SUPABASE_URL, {
