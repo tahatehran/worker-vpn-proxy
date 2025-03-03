@@ -29,38 +29,15 @@ export default {
         }
   
         const supabaseData = await response.json();
-  
-        // تبدیل ساختار داده
-        const transformedData = {
-          data: supabaseData.map(item => ({
-            ipPort: `${item.ip}:${item.port}`,
-            ip: item.ip,
-            port: item.port,
-            country: item.country || 'EU',
-            last_checked: item.last_checked,
-            proxy_level: item.proxy_level?.toLowerCase() || 'anonymous',
-            type: item.type,
-            speed: item.speed,
-            support: {
-              https: item.support?.https ? 1 : 0,
-              get: item.support?.get ? 1 : 0,
-              post: item.support?.post ? 1 : 0,
-              cookies: item.support?.cookies ? 1 : 0,
-              referer: item.support?.referer ? 1 : 0,
-              user_agent: item.support?.user_agent ? 1 : 0,
-              google: item.support?.google ? 1 : 0
-            }
-          })),
-          count: supabaseData.length
-        };
-  
-        return new Response(JSON.stringify(transformedData), {
+
+        // بدون تبدیل، داده‌های اصلی برمی‌گردند
+        return new Response(JSON.stringify(supabaseData), {
           headers: {
             'Content-Type': 'application/json',
             'Cache-Control': 'max-age=300'
           }
         });
-  
+
       } catch (error) {
         return new Response(JSON.stringify({
           error: error.message,
