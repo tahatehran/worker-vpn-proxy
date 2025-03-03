@@ -1,28 +1,31 @@
 export default {
-    async fetch(request, env) {
+    async fetch(request, env, ctx) {
         const url = new URL(request.url);
-      
-        // اعتبارسنجی مسیر و احراز هویت
-        if (url.pathname !== '/api') {
+        
+        // استفاده از یک مسیر مشخص و بررسی روش درخواست
+        if (url.pathname !== '/api' || request.method !== 'GET') {
             return new Response('Not Found', { status: 404 });
         }
-  
-        if (request.method !== 'GET') {
-            return new Response('Method Not Allowed', { status: 405 });
-        }
 
+        // احراز هویت ایمن‌تر
         const authHeader = request.headers.get('Authorization');
         if (!authHeader || authHeader !== `Bearer ${env.API_TOKEN}`) {
-            return new Response('Unauthorized', { status: 401 });
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
         try {
-            // دریافت داده از Supabase
+            // استفاده از Keep-Alive برای کاهش تأخیر و بهبود عملکرد
             const response = await fetch(env.SUPABASE_URL, {
+                method: 'GET',
                 headers: {
+                    'Authorization': `Bearer ${env.SUPABASE_KEY}`,
                     'apikey': env.SUPABASE_KEY,
-                    'Authorization': `Bearer ${env.SUPABASE_KEY}`
-                }
+                    'Connection': 'keep-alive'
+                },
+                cf: { cacheTtl: 300, cacheEverything: true } // کشینگ برای کاهش بار سرور
             });
 
             if (!response.ok) {
@@ -34,7 +37,8 @@ export default {
             return new Response(JSON.stringify(supabaseData), {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Cache-Control': 'max-age=300'
+                    'Cache-Control': 'public, max-age=300',
+                    'Connection': 'keep-alive'
                 }
             });
 
