@@ -1,54 +1,51 @@
-const API_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0enFuZmJzYW10dXZqYWhzdWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2ODc5NDEsImV4cCI6MjA1NjI2Mzk0MX0.8YhzFk1XYXrHuzmE6ctAoHMf5PjfbbXza_Z445MF9_E";
-const SUPABASE_URL = "https://vtzqnfbsamtuvjahsufw.supabase.co/rest/v1/VPN-Connections?select=*";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0enFuZmJzYW10dXZqYWhzdWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2ODc5NDEsImV4cCI6MjA1NjI2Mzk0MX0.8YhzFk1XYXrHuzmE6ctAoHMf5PjfbbXza_Z445MF9_E";
-
 export default {
-    async fetch(request) {
-      const url = new URL(request.url);
+    async fetch(request, env) {
+        const url = new URL(request.url);
       
-      // اعتبارسنجی مسیر و احراز هویت
-      if (url.pathname !== '/api') {
-        return new Response('Not Found', { status: 404 });
-      }
-  
-      if (request.method !== 'GET') {
-        return new Response('Method Not Allowed', { status: 405 });
-      }
-     const authHeader = request.headers.get('Authorization');
-      if (!authHeader || authHeader !== `Bearer ${API_TOKEN}`) {
-        return new Response('Unauthorized', { status: 401 });
-      }
-      try {
-        // دریافت داده از Supabase
-        const response = await fetch(SUPABASE_URL, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-          }
-        });
-  
-        if (!response.ok) {
-          throw new Error(`Supabase error: ${response.status}`);
+        // اعتبارسنجی مسیر و احراز هویت
+        if (url.pathname !== '/api') {
+            return new Response('Not Found', { status: 404 });
         }
   
-        const supabaseData = await response.json();
+        if (request.method !== 'GET') {
+            return new Response('Method Not Allowed', { status: 405 });
+        }
 
-        // بدون تبدیل، داده‌های اصلی برمی‌گردند
-        return new Response(JSON.stringify(supabaseData), {
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'max-age=300'
-          }
-        });
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || authHeader !== `Bearer ${env.API_TOKEN}`) {
+            return new Response('Unauthorized', { status: 401 });
+        }
 
-      } catch (error) {
-        return new Response(JSON.stringify({
-          error: error.message,
-          success: false
-        }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+        try {
+            // دریافت داده از Supabase
+            const response = await fetch(env.SUPABASE_URL, {
+                headers: {
+                    'apikey': env.SUPABASE_KEY,
+                    'Authorization': `Bearer ${env.SUPABASE_KEY}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Supabase error: ${response.status}`);
+            }
+
+            const supabaseData = await response.json();
+
+            return new Response(JSON.stringify(supabaseData), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'max-age=300'
+                }
+            });
+
+        } catch (error) {
+            return new Response(JSON.stringify({
+                error: error.message,
+                success: false
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
     }
 };
