@@ -1,3 +1,6 @@
 name = "worker-vpn"
-main = "src/index.js"  # مسیر فایل اصلی شما
+main = "src/index.js"
 compatibility_date = "2024-03-03"
+
+[vars]
+SUPABASE_URL = "https://vtzqnfbsamtuvjahsufw.supabase.co/rest/v1/VPN-Connections?select=*"
