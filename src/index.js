@@ -7,15 +7,17 @@ export default {
         // ثبت ورود درخواست
         console.log(`[${new Date().toISOString()}] Request received from IP: ${clientIP} | User-Agent: ${userAgent} | Path: ${url.pathname}`);
         
-        // استفاده از یک مسیر مشخص و بررسی روش درخواست
-        if (url.pathname !== '/api' || request.method !== 'GET') {
+        // بررسی الگوی مسیر مطابق با API اصلی
+        if (!url.pathname.startsWith('/FrontEndETA/MOBIL/api/ETA/GetETAText') || request.method !== 'GET') {
             console.log(`[${new Date().toISOString()}] Error: Invalid path or method | IP: ${clientIP} | Path: ${url.pathname} | Method: ${request.method}`);
             return new Response('Not Found', { status: 404 });
         }
 
-        // احراز هویت ایمن‌تر
+        // احراز هویت 
         const authHeader = request.headers.get('Authorization');
-        if (!authHeader || authHeader !== `Bearer ${env.API_TOKEN}`) {
+        const expectedAuth = 'Basic U3RhdGlvbk1vbml0b3I6bUVYbnN0c2dCcmdTakN5MEJuWi9va3lpMElRa2NST05IU2poUHJ4RENNSXp2M2RoMy9LYzB3V3h6M0RQZWJSRUx2WEJ3MFFpUWVkTUVOaG9NUkJtWDYzSXNIRUJ6OTh4aWZBMHNWMDd4OHdzWGhKWk9JUTFzK1g0am1wcUtMaW9IaGZoa0JOdzhYaDBpN2ovYTlxSjAzbG5zVit4US9mQk9Ca3FtTitMMzN1NUNaKzNpbWxkRm9YdmFlbzVybE1RUUgvMXg4Q3VQdzNHdXQ3YXJPSi83T3dGSktKTUU2dWMvWWNtMHBMbTdoWENQdDJnK0M2OEFMOElLbkJkRy9TVk5hbCs0L0UyVlEwZnBNZ1ZRamRURkh1ZUN4Z0pZYmJMYkw2UzVNSTN0MjV3dmFwdURJV1pTc1RGVmd1cnZidHhwSHo0Y0RBbmJacUFwV1IvS2lqblJ3PT0=';
+        
+        if (!authHeader || authHeader !== expectedAuth) {
             console.log(`[${new Date().toISOString()}] Error: Unauthorized access attempt | IP: ${clientIP}`);
             return new Response(JSON.stringify({ error: 'Unauthorized' }), {
                 status: 401,
@@ -24,10 +26,22 @@ export default {
         }
         
         // دریافت station_id از پارامترهای URL
-        const station_id = url.searchParams.get('station_id');
+        const station_id = url.searchParams.get('currentStopId');
         if (!station_id) {
-            console.log(`[${new Date().toISOString()}] Error: Missing station_id parameter | IP: ${clientIP}`);
-            return new Response(JSON.stringify({ error: 'Missing station_id parameter' }), {
+            console.log(`[${new Date().toISOString()}] Error: Missing currentStopId parameter | IP: ${clientIP}`);
+            return new Response(JSON.stringify({ error: 'Missing currentStopId parameter' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        // بررسی پارامترهای دیگر
+        const identifier = url.searchParams.get('identifier');
+        const sequence = url.searchParams.get('sequence');
+        
+        if (!identifier || !sequence) {
+            console.log(`[${new Date().toISOString()}] Error: Missing required parameters | IP: ${clientIP}`);
+            return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -36,18 +50,18 @@ export default {
         try {
             console.log(`[${new Date().toISOString()}] Fetching data for station_id: ${station_id} | IP: ${clientIP}`);
             
-            // استفاده از آدرس API مورد نظر
-            const targetUrl = `https://www.irantracking.com/FrontEndETA/MOBIL/api/ETA/GetETAText?currentStopId=${station_id}&identifier=1&sequence=2`;
+            // استفاده از آدرس API اصلی
+            const targetUrl = `https://www.irantracking.com/FrontEndETA/MOBIL/api/ETA/GetETAText?currentStopId=${station_id}&identifier=${identifier}&sequence=${sequence}`;
             
-            // ارسال درخواست به API مورد نظر
+            // ارسال درخواست به API اصلی
             const response = await fetch(targetUrl, {
                 method: 'GET',
                 headers: {
-                    'Authorization': 'Basic U3RhdGlvbk1vbml0b3I6bUVYbnN0c2dCcmdTakN5MEJuWi9va3lpMElRa2NST05IU2poUHJ4RENNSXp2M2RoMy9LYzB3V3h6M0RQZWJSRUx2WEJ3MFFpUWVkTUVOaG9NUkJtWDYzSXNIRUJ6OTh4aWZBMHNWMDd4OHdzWGhKWk9JUTFzK1g0am1wcUtMaW9IaGZoa0JOdzhYaDBpN2ovYTlxSjAzbG5zVit4US9mQk9Ca3FtTitMMzN1NUNaKzNpbWxkRm9YdmFlbzVybE1RUUgvMXg4Q3VQdzNHdXQ3YXJPSi83T3dGSktKTUU2dWMvWWNtMHBMbTdoWENQdDJnK0M2OEFMOElLbkJkRy9TVk5hbCs0L0UyVlEwZnBNZ1ZRamRURkh1ZUN4Z0pZYmJMYkw2UzVNSTN0MjV3dmFwdURJV1pTc1RGVmd1cnZidHhwSHo0Y0RBbmJacUFwV1IvS2lqblJ3PT0=',
+                    'Authorization': expectedAuth,
                     'Cache-Control': 'no-cache',
                     'Connection': 'keep-alive'
                 },
-                cf: { cacheTtl: 300, cacheEverything: true } // کشینگ برای کاهش بار سرور
+                cf: { cacheTtl: 300, cacheEverything: true }
             });
 
             if (!response.ok) {
@@ -59,10 +73,11 @@ export default {
             const apiData = await response.json();
             console.log(`[${new Date().toISOString()}] Successfully fetched data | IP: ${clientIP} | Response size: ${JSON.stringify(apiData).length} bytes`);
 
+            // ارسال پاسخ با همان فرمت API اصلی
             return new Response(JSON.stringify(apiData), {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Cache-Control': 'public, max-age=300',
+                    'Cache-Control': 'no-cache',
                     'Connection': 'keep-alive'
                 }
             });
