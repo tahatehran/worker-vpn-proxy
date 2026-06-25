@@ -21,7 +21,7 @@ jobs:
         run: pip install aiohttp requests
 
       - name: Run Proxy Tester
-        run: python test_proxies_final_socks5.py
+        run: python main.py
 
       - name: Upload best_proxies.json
         uses: actions/upload-artifact@v4
