@@ -36,6 +36,12 @@ best_proxies.json
 best_proxies.txt
 ```
 
+For easier download and direct use, the latest `best_proxies.txt` file is also available through jsDelivr:
+
+```text
+https://cdn.jsdelivr.net/gh/tahatehran/worker-vpn-proxy/best_proxies.txt
+```
+
 The JSON file contains full result details:
 
 - `total_proxies`: number of working proxies found
