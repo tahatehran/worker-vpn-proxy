@@ -1,13 +1,17 @@
-name: Proxy Tester (All GitHub Lists + SOCKS5 + Google Test)
+name: Proxy Tester
 
 on:
   schedule:
-    - cron: '0 2 * * *'          # هر روز ساعت ۲ صبح
-  workflow_dispatch:             # دستی هم اجرا کنی
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -15,17 +19,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install aiohttp requests
+        run: pip install -r requirements.txt
 
       - name: Run Proxy Tester
         run: python main.py
 
-      - name: Upload best_proxies.json
-        uses: actions/upload-artifact@v4
-        with:
-          name: best-proxies
-          path: best_proxies.json          # ← این مسیر درست هست (فایل)
-          retention-days: 30
+      - name: Commit best_proxies.json
+        if: hashFiles('best_proxies.json') != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f best_proxies.json
+          git diff --cached --quiet || git commit -m "Update best proxies"
+          git push
