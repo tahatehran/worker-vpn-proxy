@@ -6,9 +6,9 @@ import requests
 import json
 
 # ===================== تنظیمات =====================
-CONCURRENT = 100
-BATCH_SIZE = 300
-PROXY_LIMIT = 500
+CONCURRENT = 200
+BATCH_SIZE = 400
+PROXY_LIMIT = 600
 
 # ===================== APIهای تست =====================
 APIs = {
