@@ -27,11 +27,11 @@ jobs:
       - name: Run Proxy Tester
         run: python main.py
 
-      - name: Commit best_proxies.json
-        if: hashFiles('best_proxies.json') != ''
+      - name: Commit proxy output files
+        if: hashFiles('best_proxies.json') != '' || hashFiles('best_proxies.txt') != ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f best_proxies.json
+          git add -f best_proxies.json best_proxies.txt
           git diff --cached --quiet || git commit -m "Update best proxies"
           git push

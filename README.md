@@ -1,13 +1,13 @@
 # Worker VPN Proxy Tester
 
-A Python proxy checker that downloads public proxy lists, tests them against Google, and writes the fastest working proxies to `best_proxies.json`.
+A Python proxy checker that downloads public proxy lists, tests them against Google, and writes the fastest working proxies to `best_proxies.json` and `best_proxies.txt`.
 
 ## Features
 
 - Loads HTTP, HTTPS, SOCKS4, and SOCKS5 proxies from public sources.
 - Tests proxies concurrently with `aiohttp`.
 - Sorts successful proxies by response time.
-- Saves all successful results as JSON.
+- Saves all successful results as JSON and plain text.
 - Includes a GitHub Actions workflow for scheduled or manual runs.
 
 ## Requirements
@@ -33,14 +33,22 @@ When successful proxies are found, the script creates:
 
 ```text
 best_proxies.json
+best_proxies.txt
 ```
 
-The JSON file contains:
+The JSON file contains full result details:
 
 - `total_proxies`: number of working proxies found
 - `timestamp`: time the test completed
 - `test_url`: URL used for testing
 - `proxies`: sorted proxy results, fastest first
+
+The TXT file contains one proxy per line:
+
+```text
+203.0.113.10:8080
+198.51.100.20:3128
+```
 
 Example result entry:
 
@@ -79,9 +87,9 @@ The workflow at `.github/workflows/proxy-tester.yml`:
 - Can be started manually with `workflow_dispatch`
 - Installs Python dependencies
 - Runs `python main.py`
-- Commits and pushes `best_proxies.json` back to the repository when the file is generated or changed
+- Commits and pushes `best_proxies.json` and `best_proxies.txt` back to the repository when generated or changed
 
-The workflow uses `contents: write` permission so GitHub Actions can update the JSON file in the project. Because `best_proxies.json` may be ignored by `.gitignore`, the workflow force-adds that file with `git add -f best_proxies.json`.
+The workflow uses `contents: write` permission so GitHub Actions can update the output files in the project. Because the output files may be ignored by `.gitignore`, the workflow force-adds them with `git add -f`.
 
 ## Notes
 

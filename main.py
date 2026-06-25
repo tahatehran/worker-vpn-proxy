@@ -5,6 +5,14 @@ from datetime import datetime
 import requests
 import json
 
+def save_result_files(result):
+    with open("best_proxies.json", "w") as json_file:
+        json.dump(result, json_file, indent=4)
+
+    with open("best_proxies.txt", "w") as txt_file:
+        for proxy in result.get("proxies", []):
+            txt_file.write(f"{proxy['ip']}:{proxy['port']}\n")
+
 # ===================== تنظیمات =====================
 CONCURRENT = 200
 BATCH_SIZE = 400
@@ -249,9 +257,9 @@ def main():
             "test_url": "https://www.google.com",
             "proxies": all_results
         }
-        with open("best_proxies.json", "w") as f:
-            json.dump(result, f, indent=4)
+        save_result_files(result)
         print("💾 Saved to best_proxies.json")
+        print("💾 Saved to best_proxies.txt")
     else:
         print("❌ No successful proxies found!")
 
