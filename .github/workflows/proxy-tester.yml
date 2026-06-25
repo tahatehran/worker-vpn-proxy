@@ -1,9 +1,9 @@
-name: Proxy Tester (All Lists + SOCKS5 + Google Test)
+name: Proxy Tester (All GitHub Lists + SOCKS5 + Google Test)
 
 on:
   schedule:
     - cron: '0 2 * * *'          # هر روز ساعت ۲ صبح
-  workflow_dispatch:             # می‌تونی دستی هم اجرا کنی
+  workflow_dispatch:             # دستی هم اجرا کنی
 
 jobs:
   test:
@@ -18,12 +18,10 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          pip install aiohttp requests
+        run: pip install aiohttp requests
 
       - name: Run Proxy Tester
-        run: |
-          python main.py
+        run: python main.py
 
       - name: Upload best_proxies.json
         uses: actions/upload-artifact@v4
