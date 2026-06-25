@@ -1,0 +1,33 @@
+name: Proxy Tester (All Lists + SOCKS5 + Google Test)
+
+on:
+  schedule:
+    - cron: '0 2 * * *'          # هر روز ساعت ۲ صبح
+  workflow_dispatch:             # می‌تونی دستی هم اجرا کنی
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install aiohttp requests
+
+      - name: Run Proxy Tester
+        run: |
+          python main.py
+
+      - name: Upload best_proxies.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: best-proxies
+          path: best_proxies.json
+          retention-days: 30
