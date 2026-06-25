@@ -208,8 +208,13 @@ def load_proxies(url: str, fmt: str, filter_func, proxy_type: str):
 async def test_batch(session: aiohttp.ClientSession, proxies: list[str], source_name: str, offset: int, proxy_type: str):
     tasks = [asyncio.create_task(test_single_proxy(session, p, proxy_type)) for p in proxies[:CONCURRENT]]
     results = await asyncio.gather(*tasks, return_exceptions=True)
-    results = [r for r in results if r is not None]
-    successful = [r for r in results if r["status"] == "success"]
+    
+    # حذف همه خطاها از لیست results
+    results = [r for r in results if not isinstance(r, Exception)]
+    
+    # حذف Noneهایی که از test_single_proxy برگردوندن
+    successful = [r for r in results if r is not None and r.get("status") == "success"]
+    
     successful.sort(key=lambda x: x["time_ms"])
     return successful
 
