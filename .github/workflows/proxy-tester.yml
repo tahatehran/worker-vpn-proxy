@@ -27,5 +27,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: best-proxies
-          path: best_proxies.json
+          path: best_proxies.json          # ← این مسیر درست هست (فایل)
           retention-days: 30
