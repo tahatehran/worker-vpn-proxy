@@ -4,14 +4,32 @@ import time
 from datetime import datetime
 import requests
 import json
+import os
+
+def load_existing_proxies():
+    """Loads existing proxies from best_proxies.txt to prevent duplicates"""
+    if not os.path.exists("best_proxies.txt"):
+        return set()
+    
+    with open("best_proxies.txt", "r") as txt_file:
+        return {line.strip() for line in txt_file if line.strip()}
 
 def save_result_files(result):
+    """Saves results to JSON and TXT files, avoiding duplicates in TXT"""
+    # Save JSON file (unchanged)
     with open("best_proxies.json", "w") as json_file:
         json.dump(result, json_file, indent=4)
-
-    with open("best_proxies.txt", "w") as txt_file:
+    
+    # Load existing proxies to avoid duplicates
+    existing_proxies = load_existing_proxies()
+    
+    # Write only new proxies to TXT file
+    with open("best_proxies.txt", "a") as txt_file:  # Use append mode
         for proxy in result.get("proxies", []):
-            txt_file.write(f"{proxy['ip']}:{proxy['port']}\n")
+            proxy_str = f"{proxy['ip']}:{proxy['port']}"
+            if proxy_str not in existing_proxies:
+                txt_file.write(f"{proxy_str}\n")
+                existing_proxies.add(proxy_str)  # Add to set to prevent duplicates in the same batch
 
 # ===================== تنظیمات =====================
 CONCURRENT = 200
